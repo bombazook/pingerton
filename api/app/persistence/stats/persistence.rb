@@ -11,10 +11,8 @@ module Stats
       ip = IPAddr.new(address.to_s)
       ping = ping&.to_f
       pong = pong&.to_f
-      max_duration = config.timeout / 1000
-      pong = ping + max_duration if pong.nil? && timeout == true
-      duration = (pong - ping).round(3)
-      timeout = true if timeout != false && duration > max_duration
+      pong, duration = calc_pong_duration(ping:, pong:)
+      timeout = timeout != false && duration >= max_duration
       values = [{ ip: ip.to_s, ping: ping.to_s, pong: pong.to_s, duration: duration.to_s, timeout: }]
       pool.insert(table_name(ip), values:)
     end
@@ -25,11 +23,28 @@ module Stats
       failures = format_values(failures_sql(ip, from:, to:), keys: [:count])
       result[:count] += failures[:count]
       result[:count] = result[:count].to_i
-      result[:timeout_percent] = (result[:count]).positive? ? failures[:count].to_f / result[:count] : 0.0
+      result[:timeout_percent] = calc_timeout_percent(count: result[:count], failures_count: failures[:count])
       result
     end
 
     private
+
+    def calc_timeout_percent(count:, failures_count:)
+      count.positive? ? failures_count.to_f / count : 0.0
+    end
+
+    def max_duration
+      config.timeout / 1000
+    end
+
+    def calc_pong_duration(ping:, pong: nil)
+      if pong
+        duration = (pong - ping).round(3)
+        return [pong, duration] unless duration > max_duration
+      end
+
+      [ping + max_duration, max_duration]
+    end
 
     def format_values(values, keys:)
       values.each do |k, v|

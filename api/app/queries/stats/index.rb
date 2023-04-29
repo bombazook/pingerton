@@ -11,7 +11,10 @@ module Stats
     def run(params)
       contract_result = yield index_contract.call(params)
       result = contract_result.to_h
-      Success(persistence.get(result.delete(:address), **result))
+      data = persistence.get(result.delete(:address))
+      return Failure(Errors::NoDataError.new) if (data[:count]).zero?
+
+      Success(data, **result)
     end
   end
 end

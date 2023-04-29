@@ -12,13 +12,11 @@ module Receivers
 
     def run
       Async do
-        while true
-          receive
-        end
+        call while true
       end
     end
 
-    def receive
+    def call
       data, host, *other = @socket.recvmsg(MAXIMUM_MESSAGE_SIZE)
       icmp_data = data[20, data.length]
       icmp = parse_ipv4(icmp_data:, host:, other:)

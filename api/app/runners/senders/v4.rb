@@ -14,16 +14,18 @@ module Senders
 
     def run
       Async do |task|
-        while true
-          send_ping do |m|
-            m.success do |result|
-              send(ip: result[:ip], sequence: result[:sequence])
-            end
+        call(task:) while true
+      end
+    end
 
-            m.failure do |sleep|
-              sleep_for(sleep, task:)
-            end
-          end
+    def call(task: nil)
+      send_ping do |m|
+        m.success do |result|
+          send(ip: result[:ip], sequence: result[:sequence])
+        end
+
+        m.failure do |sleep|
+          sleep_for(sleep, task:)
         end
       end
     end

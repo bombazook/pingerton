@@ -16,4 +16,5 @@ module Errors
   class SequenceError < BasicError; end
   class LuaScriptNotFoundError < BasicError; end
   class WrongAttributesError < BasicError; end
+  class NoDataError < BasicError; end
 end

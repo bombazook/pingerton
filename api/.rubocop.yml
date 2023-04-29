@@ -2,6 +2,7 @@ require: rubocop-rspec
 AllCops:
   TargetRubyVersion: 3.2.1
   NewCops: enable
+  Excludes: ['lib/protocol/icmp/**/*', 'lib/version.rb']
 Metrics/MethodLength:
   Max: 15
 Style/InfiniteLoop:

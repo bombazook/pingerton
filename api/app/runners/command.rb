@@ -44,15 +44,21 @@ class Command < Samovar::Command
   def ios
     socket = Socket.new(Socket::PF_INET, Socket::SOCK_RAW, Socket::IPPROTO_ICMP)
     socket.setsockopt Socket::SOL_SOCKET, Socket::SO_REUSEPORT, true
-    { v4: Async::IO::Socket.new(socket) }
+    { v4_io: Async::IO::Socket.new(socket) }
   end
 
-  def receivers(v4: nil)
-    [Receivers::V4.new(v4)]
+  def receivers(v4_io: nil)
+    [Receivers::V4.new(v4_io)]
   end
 
-  def senders(v4: nil)
-    [Senders::V4.new(v4)]
+  def senders(v4_io: nil)
+    [Senders::V4.new(v4_io)]
+  end
+
+  def print_header(buffer)
+    buffer.puts "Pingerton v#{::Version} taking flight! Using #{container_class} #{container_options}."
+    buffer.puts "- To terminate: Ctrl-C or kill #{Process.pid}"
+    buffer.puts "- To reload configuration: kill -HUP #{Process.pid}"
   end
 
   def call
@@ -63,9 +69,7 @@ class Command < Samovar::Command
     App.finalize!
 
     Console.logger.info(self) do |buffer|
-      buffer.puts "Pingerton v#{::Version} taking flight! Using #{container_class} #{container_options}."
-      buffer.puts "- To terminate: Ctrl-C or kill #{Process.pid}"
-      buffer.puts "- To reload configuration: kill -HUP #{Process.pid}"
+      print_header(buffer)
     end
 
     GC.compact if GC.respond_to?(:compact)

@@ -4,9 +4,15 @@ ENV['RACK_ENV'] = 'test'
 
 require 'simplecov'
 SimpleCov.start do
-  add_filter %r{^/spec/}
+  add_filter '/spec/'
 end
 
+pid = Process.pid
+SimpleCov.at_exit do
+  SimpleCov.result.format! if Process.pid == pid
+end
+
+require 'async/rspec'
 require_relative '../system/boot'
 require 'database_cleaner/redis'
 require 'anyway/testing/helpers'
@@ -28,8 +34,9 @@ RSpec.configure do |config|
     ClickHouse.connection.truncate_tables
   end
 
-  config.expect_with :rspec do |expectations|
-    expectations.include_chain_clauses_in_custom_matcher_descriptions = true
+  config.expect_with :rspec do |c|
+    c.syntax = :expect
+    c.include_chain_clauses_in_custom_matcher_descriptions = true
   end
 
   config.mock_with :rspec do |mocks|

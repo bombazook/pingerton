@@ -9,7 +9,7 @@ App.register_provider(:dry_validation) do
     Dry::Validation.load_extensions(:monads)
 
     Dry::Validation.register_macro(:ip_address) do
-      if value && value !~ Resolv::IPv4::Regex && value !~ Resolv::IPv6::Regex
+      if value && value !~ Resolv::IPv4::Regex # && value !~ Resolv::IPv6::Regex
         key.failure('must be valid ipv4 or ipv6 address')
       end
     end

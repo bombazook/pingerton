@@ -1,0 +1,26 @@
+name: 'Run tests'
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+permissions:
+  contents: read
+  pull-requests: read
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: isbang/compose-action@v1.4.1
+        with:
+          compose-file: "./docker-compose.yml"
+          services: |
+            redis
+            clickhouse
+      - run: docker-compose run --rm api sh -c "bundle install && bundle exec rubocop && bundle exec rspec spec"
+

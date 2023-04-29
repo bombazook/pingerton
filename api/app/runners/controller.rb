@@ -38,7 +38,7 @@ class Controller < Async::Container::Controller
 
   def setup(container)
     container.run(name:, restart: true, **@command.container_options) do
-      Async do |_task|
+      Async do
         receivers.map(&:run)
         senders.map(&:run)
       end

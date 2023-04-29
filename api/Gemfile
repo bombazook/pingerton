@@ -28,6 +28,7 @@ group :development do
 end
 
 group :test do
+  gem 'async-rspec', '~> 1.16', '>= 1.16.1'
   gem 'database_cleaner-redis'
   gem 'rspec'
   gem 'rubocop-rspec'

@@ -1,4 +1,4 @@
-ARG RUBY_VERSION=3.2.1
+ARG RUBY_VERSION=3.2.2
 FROM ruby:$RUBY_VERSION
 
 RUN apt update -y && apt install -y curl bash libpcap-dev
