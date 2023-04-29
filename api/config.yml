@@ -1,0 +1,4 @@
+min_frequency: 10
+ttl: 30
+mtu:
+dont_fragment: false

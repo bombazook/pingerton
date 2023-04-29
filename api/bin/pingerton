@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'samovar'
+require 'async/container'
+require 'anyway_config'
+require_relative '../app/runners/command'
+
+begin
+  Command.call
+rescue Interrupt
+# Ignore.
+rescue StandardError => e
+  Console.logger.error(Command) { e }
+  exit! 1
+end

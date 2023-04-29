@@ -1,0 +1,45 @@
+services:
+  pinger:
+    build:
+      context: ${PWD:-.}/api
+      dockerfile: ${PWD:-.}/docker/dockerfiles/api/Dockerfile
+    depends_on:
+      - redis
+      - clickhouse
+    environment:
+      PINGERTON_REDIS_URL: redis://redis/1
+      PINGERTON_CLICKHOUSE_DB: ping_prod
+      PINGERTON_CLICKHOUSE_URL: http://clickhouse:8123
+    volumes:
+      - ${PWD:-.}/api:/usr/src/app
+      - api_bundle:/usr/local/bundle
+    command: sh -c "bundle install && bundle exec bin/pingerton"
+  api:
+    build:
+      context: ${PWD:-.}/api
+      dockerfile: ${PWD:-.}/docker/dockerfiles/api/Dockerfile
+    depends_on:
+      - redis
+      - clickhouse
+    environment:
+      PINGERTON_REDIS_URL: redis://redis/1
+      PINGERTON_CLICKHOUSE_DB: ping_prod
+      PINGERTON_CLICKHOUSE_URL: http://clickhouse:8123
+    ports:
+      - "9090:9090"
+    volumes:
+      - ${PWD:-.}/api:/usr/src/app
+      - api_bundle:/usr/local/bundle
+    command: sh -c "bundle install && rm -f tmp/pids/server.pid && bundle exec falcon serve -t 220 --bind http://0.0.0.0:9090"
+  redis:
+    image: redis:latest
+  clickhouse:
+    image: clickhouse/clickhouse-server:head-alpine
+    volumes:
+      - ${PWD:-.}/docker/config/clickhouse/docker-entrypoint-initdb.d/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_log:/var/log/clickhouse-server
+volumes:
+  api_bundle:
+  clickhouse_data:
+  clickhouse_log:
